@@ -10,11 +10,11 @@ class DBTest:
         shot = [s1,s2,s3]
 
         database = DBConnection()
-        database.storeShot(shot,'Jordan')
+        database.storeMovement(shot,'Shot')
 
     def test2(self):
         database = DBConnection()
-        shots = database.getShotsByUser('Jordan')
+        movements = database.getMovements('Jordan')
         print jsonpickle.encode(shots)
 test = DBTest()
 test.test1()

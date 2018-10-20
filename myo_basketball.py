@@ -30,39 +30,37 @@ class Listener(myo.DeviceListener):
         if not self.interval.check_and_reset():
           return
 
-        parts = []
-        parts.append('orientation: ')
-        if self.orientation:
-          for comp in self.orientation:
-              snap.append(comp)
-              parts.append('{}{:.4f}'.format(' ' if comp >= 0 else '', comp))
-        parts.append('\n')
-        parts.append(str(self.pose).ljust(10))
-        parts.append('\n')
-        parts.append(self.gyroscope)
-        parts.append('\n')
-        parts.append(self.roll)
-        parts.append('\n')
-        parts.append(self.pitch)
-        parts.append('\n')
-        parts.append(self.yaw)
-        parts.append('\n')
-        parts.append(self.acceleration)
-        parts.append('\n')
-        parts.append('EMG: ' if self.emg_enabled else ' ')
-    #parts.append('L' if self.locked else ' ')
-    #parts.append(self.rssi or 'NORSSI')
-
-        if self.emg:
-            for comp in self.emg:
-                snap.append(comp)
-                parts.append(str(comp).ljust(5))
-            parts.append('\n')
-            #print('\r' + ''.join('[{}]'.format(p) for p in parts), end='')
-            sys.stdout.flush()
+    #     parts = []
+    #     parts.append('orientation: ')
+    #     if self.orientation:
+    #       for comp in self.orientation:
+    #           parts.append('{}{:.4f}'.format(' ' if comp >= 0 else '', comp))
+    #     parts.append('\n')
+    #     parts.append(str(self.pose).ljust(10))
+    #     parts.append('\n')
+    #     parts.append(self.gyroscope)
+    #     parts.append('\n')
+    #     parts.append(self.roll)
+    #     parts.append('\n')
+    #     parts.append(self.pitch)
+    #     parts.append('\n')
+    #     parts.append(self.yaw)
+    #     parts.append('\n')
+    #     parts.append(self.acceleration)
+    #     parts.append('\n')
+    #     parts.append('EMG: ' if self.emg_enabled else ' ')
+    # #parts.append('L' if self.locked else ' ')
+    # #parts.append(self.rssi or 'NORSSI')
+    #
+    #     if self.emg:
+    #         for comp in self.emg:
+    #             parts.append(str(comp).ljust(5))
+    #         parts.append('\n')
+    #         #print('\r' + ''.join('[{}]'.format(p) for p in parts), end='')
+    #         sys.stdout.flush()
         s1 = Snapshot(self.orientation, self.emg, self.gyroscope,
                       self.acceleration, self.roll, self.pitch, self.yaw)
-        print(s1)
+        #print(s1)
         self.snap.append(s1)
 
 
@@ -86,7 +84,6 @@ class Listener(myo.DeviceListener):
 
     def on_pose(self, event):
         self.pose = event.pose
-
         self.output()
 
     def on_orientation(self, event):
@@ -116,6 +113,7 @@ class Listener(myo.DeviceListener):
 
     def post_snap(self):
         post = DBConnection()
+        print(len(self.snap))
         post.storeShot(self.snap, "Jake")
 
 if __name__ == '__main__':
