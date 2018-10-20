@@ -1,10 +1,9 @@
 class Snapshot:
-    def __init__(self,x,y,z,w,emg_data,roll,pitch,yaw):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.w = w
+    def __init__(self,orientation,emg_data,gyroscope,acceleration,roll,pitch,yaw):
+        self.orientation = orientation
         self.emg_data = emg_data
+        self.gyroscope = gyroscope
+        self.acceleration = acceleration
         self.roll = roll
         self.pitch = pitch
         self.yaw = yaw
