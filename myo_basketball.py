@@ -123,7 +123,8 @@ if __name__ == '__main__':
     hub = myo.Hub()
     listener = Listener()
     x = False
-
+    snap.append(1)
+    listener.post_snap()
     while hub.run(listener.on_event, 5):
         if(x is False):
             ms = time.time() * 1000
