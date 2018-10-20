@@ -2,6 +2,7 @@ from __future__ import print_function
 from myo.utils import TimeInterval
 from SnapshotDB import Snapshot
 import myo
+import myo.types
 import sys
 
 class Listener(myo.DeviceListener):
@@ -73,10 +74,9 @@ class Listener(myo.DeviceListener):
   def on_orientation(self, event):
     temp = []
     self.orientation = event.orientation
-    self.quat = quat(self.orientation[0], self.orientation[1]
-                     , self.orientation[2], self.orientation[3])
     if(self.orientation):
-        self.quaternion = myo.Quaternion(self.quat)
+        self.quaternion = myo.types.math.Quaternion(self.orientation[0], self.orientation[1]
+                         , self.orientation[2], self.orientation[3])
         self.yaw = self.quaternion.yaw()
         self.roll = self.quaternion.roll()
         self.pitch = self.quaternion.pitch()
@@ -97,13 +97,6 @@ class Listener(myo.DeviceListener):
   def on_locked(self, event):
     self.locked = True
     self.output()
-
-class quat:
-    def __init__(self,x, y, z, w):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.z = w
 
 if __name__ == '__main__':
   myo.init(sdk_path='./myosdk')
