@@ -1,57 +1,77 @@
-
+from __future__ import print_function
+from myo.utils import TimeInterval
 import myo
-import time
+import sys
 
-myo.init(sdk_path='./myosdk/')
 
-def main():
-  hub = myo.Hub()
-  listener = myo.ApiDeviceListener()
-  with hub.run_in_background(listener.on_event):
-    print("Waiting for a Myo to connect ...")
-    device = listener.wait_for_single_device(2)
-    if not device:
-      print("No Myo connected after 2 seconds.")
+class Listener(myo.DeviceListener):
+
+  def __init__(self):
+    self.interval = TimeInterval(None, 0.05)
+    self.orientation = None
+    self.pose = myo.Pose.rest
+    self.emg_enabled = False
+    self.locked = False
+    self.rssi = None
+    self.emg = None
+
+  def output(self):
+    if not self.interval.check_and_reset():
       return
-    print("Hello, Myo! Requesting RSSI ...")
-    device.request_rssi()
 
-    while hub.running and device.connected and not device.rssi :
-      print("Waiting for RRSI...")
-      time.sleep(0.001)
-    print("RSSI:", device.rssi)
+    parts = []
+    if self.orientation:
+      for comp in self.orientation:
+        parts.append('{}{:.4f}'.format(' ' if comp >= 0 else '', comp))
+    parts.append(str(self.pose).ljust(10))
+    parts.append('E' if self.emg_enabled else ' ')
+    parts.append('L' if self.locked else ' ')
+    parts.append(self.rssi or 'NORSSI')
+    if self.emg:
+      for comp in self.emg:
+        parts.append(str(comp).ljust(5))
+    print('\r' + ''.join('[{}]'.format(p) for p in parts), end='')
+    sys.stdout.flush()
 
-    print("Goodbye, Myo!")
+  def on_connected(self, event):
+    event.device.request_rssi()
+
+  def on_rssi(self, event):
+    self.rssi = event.rssi
+    self.output()
+
+  def on_pose(self, event):
+    self.pose = event.pose
+    if self.pose == myo.Pose.double_tap:
+      event.device.stream_emg(True)
+      self.emg_enabled = True
+    elif self.pose == myo.Pose.fingers_spread:
+      event.device.stream_emg(False)
+      self.emg_enabled = False
+      self.emg = None
+    self.output()
+
+  def on_orientation(self, event):
+    self.orientation = event.orientation
+    self.output()
+
+  def on_emg(self, event):
+    self.emg = event.emg
+    self.output()
+
+  def on_unlocked(self, event):
+    self.locked = False
+    self.output()
+
+  def on_locked(self, event):
+    self.locked = True
+    self.output()
 
 
-def orientation():
-    #myo.init(sdk_path='./myosdk/')
-    #hub = myo.Hub()
-    #listener = myo.DeviceListener()
-    feed = myo.device_listener.Feed()
-    hub = myo.Hub()
-    hub.run(1000, feed)
-    try:
-        while True:
-            myos = feed.get_connected_devices()
-            if myos:
-                print myos[0], myos[0].orientation
-                time.sleep(0.5)
-    finally:
-        hub.stop(True)
-        hub.shutdown()
-
-    # try:
-    #     device = listener.wait_for_single_device(2)
-    #     if not device:
-    #         print("No Myo connected after 2 seconds")
-    #     print("Hello, Myo!")
-    #     quat = None
-    #     while hub.running and device.connected and myo.on_orientation_data:
-    #         quat = device.orientation
-    #     print('Orientation:', quat.x, quat.y, quat.z, quat.w)
-    # finally:
-    #     hub.shutdown()  # !! crucial
-
-main()
-orientation()
+if __name__ == '__main__':
+  myo.init(sdk_path='./myosdk')
+  hub = myo.Hub()
+  listener = Listener()
+  while hub.run(listener.on_event, 500):
+    print("\n")
+    pass
