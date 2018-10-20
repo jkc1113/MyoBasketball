@@ -62,7 +62,7 @@ class Listener(myo.DeviceListener):
         s1 = Snapshot(self.orientation, self.emg, self.gyroscope,
                       self.acceleration, self.roll, self.pitch, self.yaw)
         self.snap.append(s1)
-        self.post_snap()
+
 
     def on_connected(self, event):
         event.device.request_rssi()
@@ -104,7 +104,7 @@ class Listener(myo.DeviceListener):
 
     def post_snap(self):
         post = DBConnection()
-        post.storeShot(self.s1, "Jake")
+        post.storeShot(self.snap, "Jake")
 
 
 if __name__ == '__main__':
@@ -116,7 +116,8 @@ if __name__ == '__main__':
             x = raw_input("press r to record snapshot or q to quit:")
             if(x is 'r'):
                 print('You Pressed r Key!')
-                hub.run(listener.on_event, 500)
+                hub.run(listener.on_event, 50)
+                listener.post_snap()
             elif(x is 'q'):
                 print("bye")
                 break
