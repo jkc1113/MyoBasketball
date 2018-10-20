@@ -155,7 +155,6 @@ class Listener(myo.DeviceListener):
   def on_locked(self, event):
     self.locked = True
     self.output()
->>>>>>> d0b7013962c6b09f5aba73bccfd0e10bd9f92261
 
 if __name__ == '__main__':
     myo.init(sdk_path='./myosdk')
