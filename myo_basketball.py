@@ -3,7 +3,6 @@ from myo.utils import TimeInterval
 import myo
 import sys
 
-
 class Listener(myo.DeviceListener):
 
   def __init__(self):
