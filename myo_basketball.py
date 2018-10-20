@@ -7,7 +7,8 @@ import sys
 from ConnectToGoogleCloud import DBConnection
 from myo.types.myo_math import Quaternion, Vector
 import keyboard
-
+import time
+snap = []
 class Listener(myo.DeviceListener):
     def __init__(self):
         self.interval = TimeInterval(None, 0.01)
@@ -23,7 +24,7 @@ class Listener(myo.DeviceListener):
         self.yaw = None
         self.roll = None
         self.pitch = None
-        self.snap = []
+        self.snap = snap
 
     def output(self):
         if not self.interval.check_and_reset():
@@ -57,15 +58,27 @@ class Listener(myo.DeviceListener):
                 snap.append(comp)
                 parts.append(str(comp).ljust(5))
             parts.append('\n')
-            print('\r' + ''.join('[{}]'.format(p) for p in parts), end='')
+            #print('\r' + ''.join('[{}]'.format(p) for p in parts), end='')
             sys.stdout.flush()
         s1 = Snapshot(self.orientation, self.emg, self.gyroscope,
                       self.acceleration, self.roll, self.pitch, self.yaw)
+        print(s1)
         self.snap.append(s1)
 
 
     def on_connected(self, event):
         event.device.request_rssi()
+        event.device.stream_emg(True)
+        self.emg_enabled = True
+        print("connected")
+        time.sleep(1)
+        print(3)
+        time.sleep(1)
+        print(2)
+        time.sleep(1)
+        print(1)
+        time.sleep(1)
+        print("shoot")
 
     def on_rssi(self, event):
         self.rssi = event.rssi
@@ -73,8 +86,7 @@ class Listener(myo.DeviceListener):
 
     def on_pose(self, event):
         self.pose = event.pose
-        event.device.stream_emg(True)
-        self.emg_enabled = True
+
         self.output()
 
     def on_orientation(self, event):
@@ -106,23 +118,17 @@ class Listener(myo.DeviceListener):
         post = DBConnection()
         post.storeShot(self.snap, "Jake")
 
-
 if __name__ == '__main__':
     myo.init(sdk_path='./myosdk')
     hub = myo.Hub()
     listener = Listener()
-    while True:
-        try: #used try so that if user pressed other than the given key error will not be shown
-            x = raw_input("press r to record snapshot or q to quit:")
-            if(x is 'r'):
-                print('You Pressed r Key!')
-                hub.run(listener.on_event, 50)
-                listener.post_snap()
-            elif(x is 'q'):
-                print("bye")
-                break
-            else:
-                print("invalid key try again")
-                continue
-        except:
+    x = False
+
+    while hub.run(listener.on_event, 5):
+        if(x is False):
+            ms = time.time() * 1000
+            x = True
+        if((time.time() *1000)- ms > 2000):
+            listener.post_snap()
             break
+        pass
