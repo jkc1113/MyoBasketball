@@ -2,6 +2,7 @@ from __future__ import print_function
 from myo.utils import TimeInterval
 from SnapshotDB import Snapshot
 import myo
+import myo.types
 import sys
 from ConnectToGoogleCloud import DBConnection
 from myo.types.myo_math import Quaternion, Vector
@@ -51,6 +52,7 @@ class Listener(myo.DeviceListener):
     #parts.append('L' if self.locked else ' ')
     #parts.append(self.rssi or 'NORSSI')
 
+<<<<<<< HEAD
         if self.emg:
             for comp in self.emg:
                 snap.append(comp)
@@ -104,6 +106,56 @@ class Listener(myo.DeviceListener):
     def post_snap(self):
         post = DBConnection()
         post.storeShot(self.s1, "Jake")
+=======
+    if self.emg:
+      for comp in self.emg:
+        snap.append(comp)
+        parts.append(str(comp).ljust(5))
+    parts.append('\n')
+    print('\r' + ''.join('[{}]'.format(p) for p in parts), end='')
+    sys.stdout.flush()
+
+
+  def on_connected(self, event):
+    event.device.request_rssi()
+
+  def on_rssi(self, event):
+    self.rssi = event.rssi
+    self.output()
+
+  def on_pose(self, event):
+    self.pose = event.pose
+    event.device.stream_emg(True)
+    self.emg_enabled = True
+    self.output()
+
+  def on_orientation(self, event):
+    temp = []
+    self.orientation = event.orientation
+    if(self.orientation):
+        self.quaternion = myo.types.math.Quaternion(self.orientation[0], self.orientation[1]
+                         , self.orientation[2], self.orientation[3])
+        self.yaw = self.quaternion.yaw()
+        self.roll = self.quaternion.roll()
+        self.pitch = self.quaternion.pitch()
+
+
+    self.acceleration = event.acceleration
+    self.gyroscope = event.gyroscope
+    self.output()
+
+  def on_emg(self, event):
+    self.emg = event.emg
+    self.output()
+
+  def on_unlocked(self, event):
+    self.locked = False
+    self.output()
+
+  def on_locked(self, event):
+    self.locked = True
+    self.output()
+>>>>>>> d0b7013962c6b09f5aba73bccfd0e10bd9f92261
 
 if __name__ == '__main__':
     myo.init(sdk_path='./myosdk')
