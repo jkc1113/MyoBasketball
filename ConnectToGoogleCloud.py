@@ -19,7 +19,7 @@ class DBConnection:
         kind = 'Shot'
 
         # The Cloud Datastore key for the new entity
-        shot_key = self.datastore_client.key(kind=kind)
+        shot_key = self.datastore_client.key(kind)
 
         # Prepares the new entity
         shot = datastore.Entity(key=shot_key)
@@ -27,12 +27,12 @@ class DBConnection:
         shot['name'] = name
 
         # Saves the entity
-        self.datastore_client.put(task)
+        self.datastore_client.put(shot)
 
     def getShotsByUser(self, name):
         query = self.datastore_client.query(kind="Shot")
         query.add_filter('name','=',name)
-        quer_iter = query.fetch
+        quer_iter = query.fetch()
         shots = []
         for entity in quer_iter:
             shots.append(jsonpickle.decode(entity['data']))
