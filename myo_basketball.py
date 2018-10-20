@@ -52,7 +52,6 @@ class Listener(myo.DeviceListener):
     #parts.append('L' if self.locked else ' ')
     #parts.append(self.rssi or 'NORSSI')
 
-<<<<<<< HEAD
         if self.emg:
             for comp in self.emg:
                 snap.append(comp)
@@ -106,55 +105,7 @@ class Listener(myo.DeviceListener):
     def post_snap(self):
         post = DBConnection()
         post.storeShot(self.s1, "Jake")
-=======
-    if self.emg:
-      for comp in self.emg:
-        snap.append(comp)
-        parts.append(str(comp).ljust(5))
-    parts.append('\n')
-    print('\r' + ''.join('[{}]'.format(p) for p in parts), end='')
-    sys.stdout.flush()
 
-
-  def on_connected(self, event):
-    event.device.request_rssi()
-
-  def on_rssi(self, event):
-    self.rssi = event.rssi
-    self.output()
-
-  def on_pose(self, event):
-    self.pose = event.pose
-    event.device.stream_emg(True)
-    self.emg_enabled = True
-    self.output()
-
-  def on_orientation(self, event):
-    temp = []
-    self.orientation = event.orientation
-    if(self.orientation):
-        self.quaternion = myo.types.math.Quaternion(self.orientation[0], self.orientation[1]
-                         , self.orientation[2], self.orientation[3])
-        self.yaw = self.quaternion.yaw()
-        self.roll = self.quaternion.roll()
-        self.pitch = self.quaternion.pitch()
-
-
-    self.acceleration = event.acceleration
-    self.gyroscope = event.gyroscope
-    self.output()
-
-  def on_emg(self, event):
-    self.emg = event.emg
-    self.output()
-
-  def on_unlocked(self, event):
-    self.locked = False
-    self.output()
-
-  def on_locked(self, event):
-    self.locked = True
-    self.output()
 
 if __name__ == '__main__':
     myo.init(sdk_path='./myosdk')
@@ -162,11 +113,15 @@ if __name__ == '__main__':
     listener = Listener()
     while True:
         try: #used try so that if user pressed other than the given key error will not be shown
-            if keyboard.is_pressed('r'):#if key 'q' is pressed
+            x = raw_input("press r to record snapshot or q to quit:")
+            if(x is 'r'):
                 print('You Pressed r Key!')
-                hub.run(listener.on_event, 50)
-                break#finishing the loop
+                hub.run(listener.on_event, 500)
+            elif(x is 'q'):
+                print("bye")
+                break
             else:
-                pass
+                print("invalid key try again")
+                continue
         except:
             break
