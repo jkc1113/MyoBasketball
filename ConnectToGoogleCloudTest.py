@@ -1,8 +1,5 @@
 # Imports the Google Cloud client library
 from google.cloud import datastore
-import os
-
-os.system('set GOOGLE_APPLICATION_CREDENTIALS="C:\Users\jkc11\Documents\MyoBasketball\MyoBasketball\GoogleCloudStuff\MyoBasketball-6daa0c614684.json"')
 
 # Instantiates a client
 datastore_client = datastore.Client()
