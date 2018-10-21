@@ -4,11 +4,12 @@ from SnapshotDB import Snapshot
 import myo
 import myo.types
 import sys
-from ConnectToGoogleCloud import DBConnection
+from ConnectToMySQL import FakeDatabase
 from myo.types.myo_math import Quaternion, Vector
 import keyboard
 import time
 snap = []
+
 class Listener(myo.DeviceListener):
     def __init__(self):
         self.interval = TimeInterval(None, 0.01)
@@ -30,34 +31,6 @@ class Listener(myo.DeviceListener):
         if not self.interval.check_and_reset():
           return
 
-    #     parts = []
-    #     parts.append('orientation: ')
-    #     if self.orientation:
-    #       for comp in self.orientation:
-    #           parts.append('{}{:.4f}'.format(' ' if comp >= 0 else '', comp))
-    #     parts.append('\n')
-    #     parts.append(str(self.pose).ljust(10))
-    #     parts.append('\n')
-    #     parts.append(self.gyroscope)
-    #     parts.append('\n')
-    #     parts.append(self.roll)
-    #     parts.append('\n')
-    #     parts.append(self.pitch)
-    #     parts.append('\n')
-    #     parts.append(self.yaw)
-    #     parts.append('\n')
-    #     parts.append(self.acceleration)
-    #     parts.append('\n')
-    #     parts.append('EMG: ' if self.emg_enabled else ' ')
-    # #parts.append('L' if self.locked else ' ')
-    # #parts.append(self.rssi or 'NORSSI')
-    #
-    #     if self.emg:
-    #         for comp in self.emg:
-    #             parts.append(str(comp).ljust(5))
-    #         parts.append('\n')
-    #         #print('\r' + ''.join('[{}]'.format(p) for p in parts), end='')
-    #         sys.stdout.flush()
         s1 = Snapshot(self.orientation, self.emg, self.gyroscope,
                       self.acceleration, self.roll, self.pitch, self.yaw)
         #print(s1)
@@ -112,9 +85,13 @@ class Listener(myo.DeviceListener):
         self.output()
 
     def post_snap(self):
-        post = DBConnection()
-        print(len(self.snap))
-        post.storeShot(self.snap, "Jake")
+        post = FakeDatabase('test_data.json')
+        post.dumpToFile(self.data)
+
+    def read_data(self):
+        post = FakeDatabase('test_data.json')
+        data = post.parseDataFromFile()
+        
 
 if __name__ == '__main__':
     myo.init(sdk_path='./myosdk')
@@ -122,12 +99,10 @@ if __name__ == '__main__':
     listener = Listener()
     x = False
     snap.append(1)
-    listener.post_snap()
     while hub.run(listener.on_event, 5):
         if(x is False):
             ms = time.time() * 1000
             x = True
         if((time.time() *1000)- ms > 2000):
-            listener.post_snap()
             break
         pass
