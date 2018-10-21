@@ -1,6 +1,7 @@
 from __future__ import print_function
 from myo.utils import TimeInterval
 from SnapshotDB import Snapshot
+from SnapshotDB import Movement
 import myo
 import myo.types
 import sys
@@ -34,7 +35,9 @@ class Listener(myo.DeviceListener):
         s1 = Snapshot(self.orientation, self.emg, self.gyroscope,
                       self.acceleration, self.roll, self.pitch, self.yaw)
         #print(s1)
-        self.snap.append(s1)
+        if( s1.orientation and s1.emg and s1.gyroscope and
+                 s1.acceleration and s1.roll and s1.pitch and s1.yaw ):
+            self.snap.append(s1)
 
 
     def on_connected(self, event):
@@ -84,25 +87,33 @@ class Listener(myo.DeviceListener):
         self.locked = True
         self.output()
 
-    def post_snap(self):
-        post = FakeDatabase('test_data.json')
-        post.dumpToFile(self.data)
+    def post_mov(self, data):
+        post = FakeDatabase('data.txt')
+        post.dumpToFile(data)
 
     def read_data(self):
-        post = FakeDatabase('test_data.json')
-        data = post.parseDataFromFile()
-        
+        post = FakeDatabase('data.txt')
+        return post.parseDataFromFile()
+
 
 if __name__ == '__main__':
     myo.init(sdk_path='./myosdk')
     hub = myo.Hub()
     listener = Listener()
-    x = False
-    snap.append(1)
-    while hub.run(listener.on_event, 5):
-        if(x is False):
-            ms = time.time() * 1000
-            x = True
-        if((time.time() *1000)- ms > 2000):
-            break
-        pass
+    collectingData = True
+    while collectingData is True:
+        listener.snap = []
+        x = False
+        while hub.run(listener.on_event, 5):
+            if(x is False):
+                ms = time.time() * 1000
+                x = True
+            if((time.time() *1000)- ms > 1000):
+                break
+            pass
+        mov_type = raw_input("What did you do? (0-Shoot  1-BouncePass  2-ChestPass  3-OverheadPass  4-Showoff)")
+        mov_type = int(mov_type)
+        if mov_type < 5:
+            listener.post_mov(Movement(listener.snap, mov_type))
+            print('data added')
+        collectingData = raw_input("Collect more data?(Y/N)") is 'Y'

@@ -7,3 +7,8 @@ class Snapshot:
         self.roll = roll
         self.pitch = pitch
         self.yaw = yaw
+
+class Movement:
+    def __init__(self, snaps, mov_type):
+        self.snaps = snaps
+        self.mov_type = mov_type

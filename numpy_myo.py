@@ -1,21 +1,57 @@
 import numpy as np
+from ConnectToMySQL import FakeDatabase
+from SnapshotDB import Movement,Snapshot
+import jsonpickle
+
+db = FakeDatabase('data.txt')
+data = db.parseDataFromFile()
+X = []
+y = []
+for mv in data:
+    #print(jsonpickle.encode(mv.snaps))
+    y.append(mv.mov_type)
+    temp = []
+    for snap in mv.snaps:
+        temp.extend([snap.orientation[0],
+                snap.orientation[1],
+                snap.orientation[2],
+                snap.orientation[3],
+                snap.emg_data[0],
+                snap.emg_data[1],
+                snap.emg_data[2],
+                snap.emg_data[3],
+                snap.emg_data[4],
+                snap.emg_data[5],
+                snap.emg_data[6],
+                snap.emg_data[7],
+                snap.gyroscope[0],
+                snap.gyroscope[1],
+                snap.gyroscope[2],
+                snap.acceleration[0],
+                snap.acceleration[1],
+                snap.acceleration[2],
+                snap.roll,
+                snap.pitch,
+                snap.yaw])
+    X.append(temp)
 
 # X = (hours studying, hours sleeping), y = score on test, xPredicted = 4 hours studying & 8 hours sleeping (input data for prediction)
-X = np.array(([2, 9], [1, 5], [3, 6]), dtype=float)
-y = np.array(([92], [86], [89]), dtype=float)
-xPredicted = np.array(([4,8]), dtype=float)
+X = np.asarray(X)
+y = np.asarray(y)
 
+#xPredicted = np.array(([4,8]), dtype=float)
+print(X)
 # scale units
 X = X/np.amax(X, axis=0) # maximum of X array
-xPredicted = xPredicted/np.amax(xPredicted, axis=0) # maximum of xPredicted (our input data for the prediction)
+#xPredicted = xPredicted/np.amax(xPredicted, axis=0) # maximum of xPredicted (our input data for the prediction)
 y = y/100 # max test score is 100
 
 class Neural_Network(object):
   def __init__(self):
   #parameters
-    self.inputSize = 2
-    self.outputSize = 1
-    self.hiddenSize = 3
+    self.inputSize = 1092
+    self.outputSize = 5
+    self.hiddenSize = 100
 
   #weights
     self.W1 = np.random.randn(self.inputSize, self.hiddenSize) # (3x2) weight matrix from input to hidden layer
@@ -56,20 +92,20 @@ class Neural_Network(object):
     np.savetxt("w1.txt", self.W1, fmt="%s")
     np.savetxt("w2.txt", self.W2, fmt="%s")
 
-  def predict(self):
-    print "Predicted data based on trained weights: ";
-    print "Input (scaled): \n" + str(xPredicted);
-    print "Output: \n" + str(self.forward(xPredicted));
+  # def predict(self):
+  #   print "Predicted data based on trained weights: ";
+  #   print "Input (scaled): \n" + str(xPredicted);
+  #   print "Output: \n" + str(self.forward(xPredicted));
 
 NN = Neural_Network()
 for i in xrange(1000): # trains the NN 1,000 times
   print "# " + str(i) + "\n"
   print "Input (scaled): \n" + str(X)
   print "Actual Output: \n" + str(y)
-  print "Predicted Output: \n" + str(NN.forward(X))
+  # print "Predicted Output: \n" + str(NN.forward(X))
   print "Loss: \n" + str(np.mean(np.square(y - NN.forward(X)))) # mean sum squared loss
   print "\n"
   NN.train(X, y)
 
 NN.saveWeights()
-NN.predict()
+#NN.predict()
