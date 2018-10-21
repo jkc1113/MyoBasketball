@@ -1,4 +1,4 @@
-from ConnectToGoogleCloud import DBConnection
+from ConnectToMySQL import FakeDatabase
 from SnapshotDB import Snapshot
 import jsonpickle
 
@@ -9,13 +9,13 @@ class DBTest:
         s3 = Snapshot([1,1,3,2],[1,2,3,4,5,6,7,8],[1,2,3],[3,2,1],45,90,0)
         shot = [s1,s2,s3]
 
-        database = DBConnection()
-        database.storeMovement(shot,'Shot')
+        database = FakeDatabase('data.json')
+        database.dumpToFile(shot)
 
     def test2(self):
-        database = DBConnection()
-        movements = database.getMovements('Jordan')
-        print jsonpickle.encode(shots)
+        database = FakeDatabase('data.json')
+        movements = database.parseDataFromFile()
+        print jsonpickle.encode(movements)
 test = DBTest()
 test.test1()
 test.test2()
