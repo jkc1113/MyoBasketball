@@ -6,9 +6,14 @@ class FakeDatabase:
 
     def parseDataFromFile(self):
         with open(self.fname, 'r') as f:
-            f.read
             return jsonpickle.decode(f.read())
 
     def dumpToFile(self,data):
+        summedData = []
+        with open(self.fname, 'r') as f:
+            string = f.read()
+            if len(string) is not 0:
+                summedData = jsonpickle.decode(string)
+        summedData.append(data)
         with open(self.fname, 'w') as f:
-            f.write(jsonpickle.encode(data))
+            f.write(jsonpickle.encode(summedData))
